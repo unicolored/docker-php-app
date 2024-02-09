@@ -61,11 +61,6 @@ RUN apt-get update && apt-get install -y \
     htop \
     rename
 
-RUN mkdir -p /etc/apt/keyrings && \
-    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
-
-RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
-
 RUN wget -O- https://packages.sury.org/php/apt.gpg | apt-key add - && \
     echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list
 
@@ -76,8 +71,6 @@ RUN apt-get update && apt-get install -y \
   nginx \
   redis \
   blackfire \
-  nodejs \
-  npm \
   openssl \
   php${PHP_VERSION}-fpm \
   php-fpm \
@@ -93,7 +86,6 @@ RUN apt-get update && apt-get install -y \
   php${PHP_VERSION}-intl \
   php${PHP_VERSION}-opcache \
   php${PHP_VERSION}-zip \
-  php${PHP_VERSION}-redis \
   php${PHP_VERSION}-soap \
   php${PHP_VERSION}-xml \
   php${PHP_VERSION}-xdebug \
@@ -154,6 +146,13 @@ RUN composer -V
 RUN composer self-update
 
 # YARN
+RUN mkdir -p /etc/apt/keyrings && \
+    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+
+RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
+
+RUN apt-get update && apt-get install -y \
+  nodejs
 RUN npm install --global yarn
 RUN yarn set version stable
 RUN yarn set version latest
