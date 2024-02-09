@@ -2,7 +2,7 @@
 
 Works great with **Symfony**, **WordPress**.
 
-Images are tested and built with **Teamcity**. \
+Images are tested and built automatically with **Docker Hub**. \
 Find the built images on public repositories on **Docker Hub**:  https://hub.docker.com/u/unicolored
 
 ⚠️ **Disclaimer** : use with caution \
