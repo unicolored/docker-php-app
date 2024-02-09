@@ -15,6 +15,7 @@ The builds include:
 * supervisor
 * node
 * yarn
+* redis
 * blackfire
 * aws cli
 * and many php modules: amqp, mongodb, mysql, intl, opcache, xdebug, ...
