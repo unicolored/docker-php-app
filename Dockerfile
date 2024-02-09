@@ -77,6 +77,7 @@ RUN apt-get update && apt-get install -y \
   redis \
   blackfire \
   nodejs \
+  npm \
   openssl \
   php${PHP_VERSION}-fpm \
   php-fpm \
