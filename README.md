@@ -1,7 +1,9 @@
-# Docker containers
+# Docker Containers for php apps
 
-Containers for php apps. Works great with Symfony, WordPress. \
-Check public repositories at https://hub.docker.com/u/unicolored
+Works great with **Symfony**, **WordPress**.
+
+Images are tested and built with **Teamcity**. \
+Find the built images on public repositories on **Docker Hub**:  https://hub.docker.com/u/unicolored
 
 ⚠️ **Disclaimer** : use with caution \
 All these Dockerfile and config files are mostly for reference and require update and testing before using it in production.
