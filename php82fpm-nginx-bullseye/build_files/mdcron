@@ -1,2 +1,0 @@
-# Check if there is a long query running, then kill it
-* 1 * * * echo "Hello world!"

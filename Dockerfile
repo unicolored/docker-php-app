@@ -1,5 +1,5 @@
 # PHP 8.2 FPM w/ Nginx
-FROM debian:bookworm-slim
+FROM debian:bullseye-slim
 
 #############
 # VARIABLES #
@@ -11,7 +11,6 @@ ARG MACHINE_USER=devops
 ###############
 ENV APP_ENV prod
 ENV PHP_VERSION 8.2
-ENV NODE_MAJOR 18
 ENV PROJECT_ROOT /var/www/html
 ENV SERVER_NAME localhost
 ENV SERVER_ADMIN admin@example.com
@@ -26,6 +25,7 @@ ARG PROJECT_SRC=${BUILD_FILES}/public
 USER root
 RUN echo "Europe/Paris" > /etc/timezone
 
+RUN apt-get update && apt-get install -y wget curl
 # dependencies required for running "phpize"
 # (see persistent deps below)
 ENV PHPIZE_DEPS \
@@ -39,32 +39,27 @@ ENV PHPIZE_DEPS \
 		pkg-config \
 		re2c
 
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+
 RUN apt-get update && apt-get install -y \
     $PHPIZE_DEPS \
     ca-certificates \
-    curl \
-    gnupg \
-    wget \
     xz-utils \
     sudo \
     unzip \
-    python-is-python3 \
+    python \
     apt-transport-https \
     lsb-release \
     cron \
     multitail \
     nano \
     supervisor \
-    mariadb-client-core \
+    nodejs \
+    mariadb-client-core-10.5 \
     php-dev \
     php-pear \
     htop \
     rename
-
-RUN mkdir -p /etc/apt/keyrings && \
-    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
-
-RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
 
 RUN wget -O- https://packages.sury.org/php/apt.gpg | apt-key add - && \
     echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list
@@ -73,13 +68,13 @@ RUN wget -q -O - https://packages.blackfire.io/gpg.key | sudo dd of=/usr/share/k
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/blackfire-archive-keyring.asc] http://packages.blackfire.io/debian any main" | sudo tee /etc/apt/sources.list.d/blackfire.list
 
 RUN apt-get update && apt-get install -y \
+  #apache2 \
   nginx \
   redis \
   blackfire \
-  nodejs \
+#  blackfire-php \
   openssl \
   php${PHP_VERSION}-fpm \
-  php-fpm \
   php${PHP_VERSION}-cli \
   php${PHP_VERSION}-common \
   php${PHP_VERSION}-curl \
@@ -87,11 +82,11 @@ RUN apt-get update && apt-get install -y \
   php${PHP_VERSION}-amqp \
   php${PHP_VERSION}-mongodb \
   php${PHP_VERSION}-mysql \
-  php${PHP_VERSION}-sqlite \
   php${PHP_VERSION}-gd \
   php${PHP_VERSION}-intl \
   php${PHP_VERSION}-opcache \
   php${PHP_VERSION}-zip \
+  php${PHP_VERSION}-redis \
   php${PHP_VERSION}-soap \
   php${PHP_VERSION}-xml \
   php${PHP_VERSION}-xdebug \
