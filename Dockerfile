@@ -77,6 +77,7 @@ RUN apt-get update && apt-get install -y \
   redis \
   blackfire \
   nodejs \
+  npm \
   openssl \
   php${PHP_VERSION}-fpm \
   php-fpm \
@@ -92,6 +93,7 @@ RUN apt-get update && apt-get install -y \
   php${PHP_VERSION}-intl \
   php${PHP_VERSION}-opcache \
   php${PHP_VERSION}-zip \
+  php${PHP_VERSION}-redis \
   php${PHP_VERSION}-soap \
   php${PHP_VERSION}-xml \
   php${PHP_VERSION}-xdebug \
@@ -134,12 +136,12 @@ RUN cd && \
 
 
 RUN mkdir -p /var/run/blackfire
-RUN blackfire php:install && \
-    blackfire agent:config \
-    --server-id=acd94c3d-a7e8-452e-a609-3279b7d031ed \
-    --server-token=7a0c7000131c03d6ed69ca51485fb719271951420c5dc29303f6a127698dfff2 \
-    --socket=tcp://127.0.0.1:8307 \
-    --log-file=/var/log/blackfire-agent.log
+#RUN blackfire php:install && \
+#    blackfire agent:config \
+#    --server-id=<server_id> \
+#    --server-token=<server_token> \
+#    --socket=tcp://127.0.0.1:8307 \
+#    --log-file=/var/log/blackfire-agent.log
 
 RUN rm -r /var/lib/apt/lists/*
 
