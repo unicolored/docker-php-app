@@ -29,20 +29,21 @@ The builds include:
 
 set -e
 
-# AWS ECR
-ECR_REPO="<account_number>.dkr.ecr.<region>.amazonaws.com/ci/<repository>:<tag>"
-# DOCKER HUB PUBLIC
-ECR_REPO="<repository>:<version>"
+REPOSITORY=php-app
+TAG=php82fpm-nginx-bookworm
+AWS_HOST=951583383645.dkr.ecr.eu-west-1.amazonaws.com/ci
+DOCKER_HOST=unicolored
 
-docker build -t "${ECR_REPO}" .
+AWS_REPO="${AWS_HOST}/${REPOSITORY}:${TAG}"
+DOCKER_REPO="${DOCKER_HOST}/${REPOSITORY}:${TAG}"
 
-# AUTH WITH AWS ECR - require credentials/profile
-#aws ecr get-login-password --region eu-west-1 --profile <option_profile> | docker login --username AWS --password-stdin "${ECR_REPO}"
-
-docker push "${ECR_REPO}"
+# docker login
+# aws ecr get-login-password --region eu-west-1 --profile mdfgroup | docker login --username AWS --password-stdin "${ECR_REPO}"
+docker build -t "${ECR_REPO}" . \
+&& docker push "${ECR_REPO}"
 
 # Eventually delete the image locally
-docker rmi "${ECR_REPO}"
+docker rmi "${DOCKER_REPO}"
 ```
 
 ## Run a container locally
@@ -53,11 +54,11 @@ docker rmi "${ECR_REPO}"
 set -e
 
 CONTAINER_NAME=MyContainer
-ECR_REPO="<account_number>.dkr.ecr.<region>.amazonaws.com/ci/<repository>:<tag>"
+REPO="<account_number>.dkr.ecr.<region>.amazonaws.com/ci/<repository>:<tag>"
 
 docker stop $CONTAINER_NAME || true
 docker rm $CONTAINER_NAME || true
-docker build -t "${ECR_REPO}" .
-docker run -d --name $CONTAINER_NAME -p 1337:80 "${ECR_REPO}"
+docker build -t "${REPO}" .
+docker run -d --name $CONTAINER_NAME -p 1337:80 "${REPO}"
 docker exec -it $CONTAINER_NAME /bin/bash
 ```
