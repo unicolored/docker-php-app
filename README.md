@@ -1,4 +1,4 @@
-# Docker Containers for php apps
+# Docker Container for php apps
 
 Works great with **Symfony**, **WordPress**.
 
