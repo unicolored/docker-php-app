@@ -131,8 +131,8 @@ RUN cd && \
 RUN mkdir -p /var/run/blackfire
 RUN blackfire php:install && \
     blackfire agent:config \
-    --server-id=acd94c3d-a7e8-452e-a609-3279b7d031ed \
-    --server-token=7a0c7000131c03d6ed69ca51485fb719271951420c5dc29303f6a127698dfff2 \
+    --server-id=<server_id> \
+    --server-token=<server_token> \
     --socket=tcp://127.0.0.1:8307 \
     --log-file=/var/log/blackfire-agent.log
 
