@@ -54,11 +54,15 @@ docker rmi "${DOCKER_REPO}"
 set -e
 
 CONTAINER_NAME=MyContainer
-REPO="<account_number>.dkr.ecr.<region>.amazonaws.com/ci/<repository>:<tag>"
+REPOSITORY=php-app
+TAG=php82fpm-nginx-bookworm
+AWS_HOST=951583383645.dkr.ecr.eu-west-1.amazonaws.com/ci
+DOCKER_HOST=unicolored
+DOCKER_REPO="${DOCKER_HOST}/${REPOSITORY}:${TAG}"
 
 docker stop $CONTAINER_NAME || true
 docker rm $CONTAINER_NAME || true
-docker build -t "${REPO}" .
-docker run -d --name $CONTAINER_NAME -p 1337:80 "${REPO}"
+docker build -t "${DOCKER_REPO}" .
+docker run -d --name $CONTAINER_NAME -p 1337:80 "${DOCKER_REPO}"
 docker exec -it $CONTAINER_NAME /bin/bash
 ```
