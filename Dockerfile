@@ -11,7 +11,7 @@ ARG MACHINE_USER=devops
 ###############
 ENV APP_ENV prod
 ENV PHP_VERSION 8.2
-ENV NODE_MAJOR 18
+ENV NODE_MAJOR 20
 ENV PROJECT_ROOT /var/www/html
 ENV SERVER_NAME localhost
 ENV SERVER_ADMIN admin@example.com
