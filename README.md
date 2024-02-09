@@ -15,6 +15,7 @@ The builds include:
 * supervisor
 * node
 * yarn
+* cachetool
 * redis
 * blackfire
 * aws cli
