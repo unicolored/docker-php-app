@@ -136,12 +136,12 @@ RUN cd && \
 
 
 RUN mkdir -p /var/run/blackfire
-RUN blackfire php:install && \
-    blackfire agent:config \
-    --server-id=<server_id> \
-    --server-token=<server_token> \
-    --socket=tcp://127.0.0.1:8307 \
-    --log-file=/var/log/blackfire-agent.log
+#RUN blackfire php:install && \
+#    blackfire agent:config \
+#    --server-id=<server_id> \
+#    --server-token=<server_token> \
+#    --socket=tcp://127.0.0.1:8307 \
+#    --log-file=/var/log/blackfire-agent.log
 
 RUN rm -r /var/lib/apt/lists/*
 
