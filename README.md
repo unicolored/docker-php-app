@@ -39,8 +39,8 @@ DOCKER_REPO="${DOCKER_HOST}/${REPOSITORY}:${TAG}"
 
 # docker login
 # aws ecr get-login-password --region eu-west-1 --profile <profile> | docker login --username AWS --password-stdin "${ECR_REPO}"
-docker build -t "${ECR_REPO}" . \
-&& docker push "${ECR_REPO}"
+docker build -t "${DOCKER_REPO}" . \
+&& docker push "${DOCKER_REPO}"
 
 # Eventually delete the image locally
 docker rmi "${DOCKER_REPO}"
