@@ -1,8 +1,6 @@
 # PHP 8.2 FPM w/ Nginx
 FROM debian:bullseye-slim
 
-LABEL sync.version="5"
-
 #############
 # VARIABLES #
 #############
@@ -96,7 +94,9 @@ RUN apt-get update && apt-get install -y \
 
 RUN apt purge php7.4\* -y
 
-RUN apt install -y imagemagick
+RUN apt install -y imagemagick && \
+    apt-get clean && \
+    rm -rf /tmp/* /var/tmp/*
 
 RUN pecl install xdebug
 
@@ -135,18 +135,8 @@ RUN blackfire php:install && \
     --server-token=7a0c7000131c03d6ed69ca51485fb719271951420c5dc29303f6a127698dfff2 \
     --socket=tcp://127.0.0.1:8307 \
     --log-file=/var/log/blackfire-agent.log
-    #--log-file=/var/log/blackfire-agent.log
-#RUN systemctl restart blackfire-agent
 
-#RUN echo 'memory_limit = 2048M' >> /etc/php/${PHP_VERSION}/cli/conf.d/docker-php-memlimit.ini;
-
-#clean apt lib
 RUN rm -r /var/lib/apt/lists/*
-
-# APACHE SETUP
-#RUN a2enmod rewrite ssl headers expires deflate setenvif mpm_prefork && \
-#    a2dismod mpm_event
-#RUN rm /etc/apache2/sites-available/default-ssl.conf
 
 # COMPOSER INSTALLATION
 RUN curl -sS https://getcomposer.org/installer | php && \
@@ -154,7 +144,6 @@ RUN curl -sS https://getcomposer.org/installer | php && \
     chmod +x /usr/local/bin/composer
 
 RUN composer -V
-RUN composer diagnose
 RUN composer self-update
 
 # YARN
@@ -208,7 +197,6 @@ RUN chmod 775 ${PROJECT_ROOT} -R && \
 # NGINX CONFIGURATION #
 ############################
 COPY ${BUILD_FILES}/default.conf /etc/nginx/sites-available/default
-#RUN ln -s /etc/nginx/sites-available/website.conf /etc/nginx/sites-enabled/website.conf
 COPY ${BUILD_FILES}/public ${PROJECT_ROOT}/public
 COPY ${BUILD_FILES}/fpm/website_pool.conf /etc/php/${PHP_VERSION}/fpm/pool.d
 # Will create the sock, so supervisor can start the program php-fpm
