@@ -1,8 +1,6 @@
 # PHP 8.2 FPM w/ Nginx
 FROM debian:bookworm-slim
 
-LABEL sync.version="5"
-
 #############
 # VARIABLES #
 #############
@@ -16,6 +14,7 @@ ENV PHP_VERSION 8.2
 ENV NODE_MAJOR 18
 ENV PROJECT_ROOT /var/www/html
 ENV SERVER_NAME localhost
+ENV SERVER_ADMIN admin@example.com
 ENV APACHE_DOCUMENT_ROOT ${PROJECT_ROOT}/public
 ENV PROJECT_VAR ${PROJECT_ROOT}/var
 ENV PROJECT_LOG ${PROJECT_VAR}/log
@@ -150,11 +149,12 @@ RUN curl -sS https://getcomposer.org/installer | php && \
     chmod +x /usr/local/bin/composer
 
 RUN composer -V
-RUN composer diagnose
 RUN composer self-update
 
 # YARN
 RUN npm install --global yarn
+RUN yarn set version stable
+RUN yarn set version latest
 
 # CACHETOOL - to clear opcache
 # https://github.com/gordalina/cachetool
