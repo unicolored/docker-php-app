@@ -76,7 +76,8 @@ RUN apt-get update && apt-get install -y \
   nginx \
   redis \
   blackfire \
-  nodejs \
+  nodejs-dev \
+  node-gyp \
   npm \
   openssl \
   php${PHP_VERSION}-fpm \
