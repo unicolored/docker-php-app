@@ -31,14 +31,14 @@ set -e
 
 REPOSITORY=php-app
 TAG=php82fpm-nginx-bookworm
-AWS_HOST=951583383645.dkr.ecr.eu-west-1.amazonaws.com/ci
+AWS_HOST=<accoundId>.dkr.ecr.<region>.amazonaws.com/ci
 DOCKER_HOST=unicolored
 
 AWS_REPO="${AWS_HOST}/${REPOSITORY}:${TAG}"
 DOCKER_REPO="${DOCKER_HOST}/${REPOSITORY}:${TAG}"
 
 # docker login
-# aws ecr get-login-password --region eu-west-1 --profile mdfgroup | docker login --username AWS --password-stdin "${ECR_REPO}"
+# aws ecr get-login-password --region eu-west-1 --profile <profile> | docker login --username AWS --password-stdin "${ECR_REPO}"
 docker build -t "${ECR_REPO}" . \
 && docker push "${ECR_REPO}"
 
