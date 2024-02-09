@@ -6,7 +6,7 @@ Images are tested and built with **Teamcity**. \
 Find the built images on public repositories on **Docker Hub**:  https://hub.docker.com/u/unicolored
 
 ⚠️ **Disclaimer** : use with caution \
-All these Dockerfile and config files are mostly for reference and require update and testing before using it in production.
+All these Dockerfile and config files are mostly for reference. Update and test before using in production.
 
 The builds include:
 * nginx
