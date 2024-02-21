@@ -86,6 +86,7 @@ RUN apt-get update && apt-get install -y \
   php${PHP_VERSION}-intl \
   php${PHP_VERSION}-opcache \
   php${PHP_VERSION}-zip \
+  php${PHP_VERSION}-redis \
   php${PHP_VERSION}-soap \
   php${PHP_VERSION}-xml \
   php${PHP_VERSION}-xdebug \
