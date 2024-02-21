@@ -1,5 +1,3 @@
 *.sh
-.idea
-.DS_Store
 *.pem
 *.deb
