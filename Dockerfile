@@ -1,5 +1,5 @@
 # PHP 8.2 FPM w/ Nginx
-FROM debian:bookworm-slim
+FROM debian:buster-slim
 
 #############
 # VARIABLES #
@@ -10,7 +10,7 @@ ARG MACHINE_USER=devops
 # ENVIRONMENT #
 ###############
 ENV APP_ENV prod
-ENV PHP_VERSION 8.2
+ENV PHP_VERSION 8.1
 ENV NODE_MAJOR 20
 ENV PROJECT_ROOT /var/www/html
 ENV SERVER_NAME localhost
@@ -48,14 +48,14 @@ RUN apt-get update && apt-get install -y \
     xz-utils \
     sudo \
     unzip \
-    python-is-python3 \
     apt-transport-https \
     lsb-release \
     cron \
     multitail \
     nano \
     supervisor \
-    mariadb-client-core \
+    mariadb-server \
+    mariadb-client \
     php-dev \
     php-pear \
     htop \
@@ -98,19 +98,19 @@ RUN apt install -y imagemagick && \
     apt-get clean && \
     rm -rf /tmp/* /var/tmp/*
 
-RUN pecl install xdebug
+#RUN pecl install xdebug
 
 RUN wget -P /etc/ssl/certs/ http://curl.haxx.se/ca/cacert.pem && \
     chmod 744 /etc/ssl/certs/cacert.pem
-RUN pecl channel-update pecl.php.net
-RUN pecl install mongodb-1.15.0
-RUN pecl install redis
-RUN pecl upgrade
+#RUN pecl channel-update pecl.php.net
+#RUN pecl install mongodb-1.15.0
+#RUN pecl install redis
+#RUN pecl upgrade
 
-COPY ${BUILD_FILES}/php${PHP_VERSION}.ini /etc/php/${PHP_VERSION}/cli/php.ini
-COPY ${BUILD_FILES}/php${PHP_VERSION}.ini /etc/php/${PHP_VERSION}/fpm/php.ini
-COPY ${BUILD_FILES}/conf${PHP_VERSION}.d /etc/php/${PHP_VERSION}/cli/conf.d
-COPY ${BUILD_FILES}/conf${PHP_VERSION}.d /etc/php/${PHP_VERSION}/fpm/conf.d
+COPY ${BUILD_FILES}/php.ini /etc/php/${PHP_VERSION}/cli/php.ini
+COPY ${BUILD_FILES}/php.ini /etc/php/${PHP_VERSION}/fpm/php.ini
+COPY ${BUILD_FILES}/conf.d /etc/php/${PHP_VERSION}/cli/conf.d
+COPY ${BUILD_FILES}/conf.d /etc/php/${PHP_VERSION}/fpm/conf.d
 
 RUN mkdir -p /usr/local/etc/openssl@1.1
 #COPY ${BUILD_FILES}/cert.pem /usr/local/etc/openssl@1.1/cert.pem
