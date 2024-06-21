@@ -30,7 +30,7 @@ The builds include:
 set -e
 
 REPOSITORY=php-app
-TAG=php81fpm-nginx-buster
+TAG=php83fpm-nginx-buster
 AWS_HOST=<accoundId>.dkr.ecr.<region>.amazonaws.com/ci
 DOCKER_HOST=unicolored
 
