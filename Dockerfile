@@ -1,5 +1,5 @@
-# PHP 8.2 FPM w/ Nginx
-FROM debian:buster-slim
+# PHP 8.3 FPM w/ Nginx
+FROM debian:bookworm-slim
 
 #############
 # VARIABLES #
