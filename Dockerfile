@@ -155,6 +155,7 @@ RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesourc
 RUN apt-get update && apt-get install -y \
   nodejs
 RUN npm install --global yarn
+RUN corepack enable
 RUN yarn set version stable
 RUN yarn set version latest
 
