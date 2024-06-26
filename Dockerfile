@@ -5,6 +5,7 @@ FROM debian:bookworm-slim
 # VARIABLES #
 #############
 ARG MACHINE_USER=devops
+ARG TIMEZONE=Europe/Paris
 
 ###############
 # ENVIRONMENT #
@@ -25,7 +26,8 @@ ARG PROJECT_SRC=${BUILD_FILES}/public
 # -------------------------------------------------------------------------------------------------------------------- #
 
 USER root
-RUN echo "Europe/Paris" > /etc/timezone
+RUN echo "${TIMEZONE}" > /etc/timezone
+RUN ln -sf /usr/share/zoneinfo/${TIMEZONE} /etc/localtime
 
 # dependencies required for running "phpize"
 # (see persistent deps below)
