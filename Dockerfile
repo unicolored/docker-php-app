@@ -207,7 +207,8 @@ RUN chmod 775 ${PROJECT_ROOT} -R && \
 ############################
 # NGINX CONFIGURATION #
 ############################
-COPY ${BUILD_FILES}/sites-enabled-default.conf /etc/nginx/sites-enabled/default
+# The file in sites-available has a symlink "default" in sites-enabled
+COPY ${BUILD_FILES}/sites-available-default.conf /etc/nginx/sites-available/default
 COPY ${BUILD_FILES}/conf.d.extend.conf /etc/nginx/conf.d/extend.conf
 COPY ${BUILD_FILES}/public ${PROJECT_ROOT}/public
 COPY ${BUILD_FILES}/fpm/website_pool.conf /etc/php/${PHP_VERSION}/fpm/pool.d
