@@ -95,7 +95,7 @@ RUN apt-get update && apt-get install -y \
   php${PHP_VERSION}-xdebug \
   php-excimer
 
-RUN apt purge php7.4\* -y
+RUN apt purge php8.2\* -y
 
 RUN apt install -y imagemagick && \
     apt-get clean && \
@@ -110,8 +110,8 @@ RUN wget -P /etc/ssl/certs/ http://curl.haxx.se/ca/cacert.pem && \
 #RUN pecl install redis
 #RUN pecl upgrade
 
-COPY ${BUILD_FILES}/php.ini /etc/php/${PHP_VERSION}/cli/php.ini
-COPY ${BUILD_FILES}/php.ini /etc/php/${PHP_VERSION}/fpm/php.ini
+#COPY ${BUILD_FILES}/php.ini /etc/php/${PHP_VERSION}/cli/php.ini
+#COPY ${BUILD_FILES}/php.ini /etc/php/${PHP_VERSION}/fpm/php.ini
 COPY ${BUILD_FILES}/conf.d /etc/php/${PHP_VERSION}/cli/conf.d
 COPY ${BUILD_FILES}/conf.d /etc/php/${PHP_VERSION}/fpm/conf.d
 
