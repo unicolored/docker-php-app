@@ -73,7 +73,7 @@ RUN wget -O- https://packages.sury.org/php/apt.gpg | apt-key add - && \
 RUN apt-get update && apt-get install -y \
   nginx \
   redis \
-  blackfire \
+  #blackfire \
   openssl \
   php${PHP_VERSION}-fpm \
   php-fpm \
@@ -131,7 +131,7 @@ RUN cd && \
 #RUN dpkg -i -E /root/amazon-cloudwatch-agent.deb
 
 
-RUN mkdir -p /var/run/blackfire
+#RUN mkdir -p /var/run/blackfire
 #RUN blackfire php:install && \
 #    blackfire agent:config \
 #    --server-id=<server_id> \
