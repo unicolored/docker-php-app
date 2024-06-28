@@ -207,7 +207,7 @@ RUN chmod 775 ${PROJECT_ROOT} -R && \
 ############################
 # NGINX CONFIGURATION #
 ############################
-COPY ${BUILD_FILES}/nginx-default.conf /etc/nginx/conf.d/default
+COPY ${BUILD_FILES}/nginx-default.conf /etc/nginx/conf.d/default.conf
 COPY ${BUILD_FILES}/public ${PROJECT_ROOT}/public
 COPY ${BUILD_FILES}/fpm/website_pool.conf /etc/php/${PHP_VERSION}/fpm/pool.d
 # Will create the sock, so supervisor can start the program php-fpm
