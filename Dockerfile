@@ -115,8 +115,18 @@ RUN wget -P /etc/ssl/certs/ http://curl.haxx.se/ca/cacert.pem && \
 COPY ${BUILD_FILES}/conf.d /etc/php/${PHP_VERSION}/cli/conf.d
 COPY ${BUILD_FILES}/conf.d /etc/php/${PHP_VERSION}/fpm/conf.d
 
-RUN mkdir -p /usr/local/etc/openssl@1.1
+#RUN mkdir -p /usr/local/etc/openssl@1.1
 #COPY ${BUILD_FILES}/cert.pem /usr/local/etc/openssl@1.1/cert.pem
+
+#####################
+# CUSTOM USER SETUP #
+#####################
+# Creating the user and group
+#RUN groupadd ${MACHINE_USER}
+RUN addgroup --gid 1337 ${MACHINE_USER}
+RUN useradd -g ${MACHINE_USER} -m -d /home/${MACHINE_USER} ${MACHINE_USER} -s /bin/bash
+#RUN adduser --disabled-password --gecos "" --force-badname --ingroup ${MACHINE_USER} ${MACHINE_USER}
+RUN usermod -aG www-data ${MACHINE_USER}
 
 #########################
 # AWS CLI Install & Setup #
@@ -181,15 +191,6 @@ RUN curl -sLO https://github.com/gordalina/cachetool/releases/latest/download/ca
 RUN sudo update-alternatives --set php /usr/bin/php${PHP_VERSION}
 RUN sudo update-alternatives --set phar /usr/bin/phar${PHP_VERSION}
 RUN sudo update-alternatives --set phar.phar /usr/bin/phar.phar${PHP_VERSION}
-
-#####################
-# CUSTOM USER SETUP #
-#####################
-# Creating the user and group
-RUN groupadd user && useradd -g user -m -d /home/user user -s /bin/bash
-RUN addgroup --gid 1337 ${MACHINE_USER} && \
-    adduser --disabled-password --gecos "" --force-badname --ingroup ${MACHINE_USER} ${MACHINE_USER} && \
-    usermod -aG www-data ${MACHINE_USER}
 
 ######################
 # DEFAULT LOGS FILES #
