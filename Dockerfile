@@ -149,6 +149,15 @@ RUN curl -sS https://getcomposer.org/installer | php && \
 RUN composer -V
 RUN composer self-update
 
+# WP-CLI INSTALLATION
+USER root
+RUN cd /home/${MACHINE_USER} && \
+    curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
+    php wp-cli.phar --info && \
+    chmod +x wp-cli.phar && \
+    mv /home/${MACHINE_USER}/wp-cli.phar /usr/local/bin/wp
+RUN wp cli update
+
 # YARN
 RUN mkdir -p /etc/apt/keyrings && \
     curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
