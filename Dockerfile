@@ -67,8 +67,8 @@ RUN apt-get update && apt-get install -y \
 RUN wget -O- https://packages.sury.org/php/apt.gpg | apt-key add - && \
     echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list
 
-RUN wget -q -O - https://packages.blackfire.io/gpg.key | sudo dd of=/usr/share/keyrings/blackfire-archive-keyring.asc && \
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/blackfire-archive-keyring.asc] http://packages.blackfire.io/debian any main" | sudo tee /etc/apt/sources.list.d/blackfire.list
+#RUN wget -q -O - https://packages.blackfire.io/gpg.key | sudo dd of=/usr/share/keyrings/blackfire-archive-keyring.asc && \
+#    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/blackfire-archive-keyring.asc] http://packages.blackfire.io/debian any main" | sudo tee /etc/apt/sources.list.d/blackfire.list
 
 RUN apt-get update && apt-get install -y \
   nginx \
@@ -207,7 +207,7 @@ RUN chmod 775 ${PROJECT_ROOT} -R && \
 ############################
 # NGINX CONFIGURATION #
 ############################
-COPY ${BUILD_FILES}/default.conf /etc/nginx/sites-available/default
+COPY ${BUILD_FILES}/default.conf /etc/nginx/conf.d/default
 COPY ${BUILD_FILES}/public ${PROJECT_ROOT}/public
 COPY ${BUILD_FILES}/fpm/website_pool.conf /etc/php/${PHP_VERSION}/fpm/pool.d
 # Will create the sock, so supervisor can start the program php-fpm
