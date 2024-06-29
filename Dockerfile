@@ -118,6 +118,13 @@ COPY ${BUILD_FILES}/conf.d /etc/php/${PHP_VERSION}/fpm/conf.d
 #RUN mkdir -p /usr/local/etc/openssl@1.1
 #COPY ${BUILD_FILES}/cert.pem /usr/local/etc/openssl@1.1/cert.pem
 
+# ADD SELF SIGNED CERTS FOR LOCALHOST HTTPS
+# ssl_certificate /etc/ssl/certs/server.cert;
+COPY ${BUILD_FILES}/certs/server.cert /etc/ssl/certs/server.cert
+# ssl_certificate_key /etc/ssl/private/server.key;
+COPY ${BUILD_FILES}/certs/server.key /etc/ssl/private/server.key
+
+
 #####################
 # CUSTOM USER SETUP #
 #####################
