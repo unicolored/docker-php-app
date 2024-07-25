@@ -42,7 +42,7 @@ ENV PHPIZE_DEPS \
 		pkg-config \
 		re2c
 
-RUN apt-get update && apt-get install -y \
+RUN apt update && apt install -y \
     $PHPIZE_DEPS \
     ca-certificates \
     curl \
@@ -70,7 +70,7 @@ RUN wget -O- https://packages.sury.org/php/apt.gpg | apt-key add - && \
 #RUN wget -q -O - https://packages.blackfire.io/gpg.key | sudo dd of=/usr/share/keyrings/blackfire-archive-keyring.asc && \
 #    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/blackfire-archive-keyring.asc] http://packages.blackfire.io/debian any main" | sudo tee /etc/apt/sources.list.d/blackfire.list
 
-RUN apt-get update && apt-get install -y \
+RUN apt update && apt install -y \
   nginx \
   redis \
   #blackfire \
@@ -98,12 +98,12 @@ RUN apt-get update && apt-get install -y \
 RUN apt purge php8.2\* -y
 
 RUN apt install -y imagemagick && \
-    apt-get clean && \
+    apt clean && \
     rm -rf /tmp/* /var/tmp/*
 
 #RUN pecl install xdebug
 
-RUN apt upgrade
+RUN apt upgrade -y
 
 RUN wget -P /etc/ssl/certs/ http://curl.haxx.se/ca/cacert.pem && \
     chmod 744 /etc/ssl/certs/cacert.pem
@@ -183,7 +183,7 @@ RUN mkdir -p /etc/apt/keyrings && \
 
 RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
 
-RUN apt-get update && apt-get install -y \
+RUN apt update && apt install -y \
   nodejs
 RUN npm install --global yarn
 RUN corepack enable
