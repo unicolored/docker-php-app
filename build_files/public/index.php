@@ -2,12 +2,9 @@
 <html lang="en" dir="ltr">
 <head>
     <meta charset="utf-8">
-    <title>Hello world! 🌍</title>
+    <title>👋 Hello World! 🌍</title>
 </head>
 <body>
-<h1>👋 Hello friend!</h1>
-<p>Ready to publish a PHP app!?</p>
-<hr>
-<?php echo phpinfo();?>
+<h1>👋 Hello World! 🌍</h1>
 </body>
 </html>
