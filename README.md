@@ -31,19 +31,24 @@ set -e
 
 REPOSITORY=php-app
 TAG=php83fpm-nginx-bookworm
-AWS_HOST=<accoundId>.dkr.ecr.<region>.amazonaws.com/ci
-DOCKER_HOST=unicolored
 
-AWS_REPO="${AWS_HOST}/${REPOSITORY}:${TAG}"
+#AWS_HOST=<accoundId>.dkr.ecr.<region>.amazonaws.com/ci
+#AWS_REPO="${AWS_HOST}/${REPOSITORY}:${TAG}"
+
+DOCKER_HOST=unicolored
 DOCKER_REPO="${DOCKER_HOST}/${REPOSITORY}:${TAG}"
 
 # docker login
 # aws ecr get-login-password --region eu-west-1 --profile <profile> | docker login --username AWS --password-stdin "${ECR_REPO}"
+
+# LOCAL BUILD
 docker build -t "${DOCKER_REPO}" . \
 && docker push "${DOCKER_REPO}"
-
 # Eventually delete the image locally
 docker rmi "${DOCKER_REPO}"
+
+# CLOUD BUILD
+docker buildx build --builder cloud-unicolored-my-cloud-builder --push -t "${DOCKER_REPO}" .
 ```
 
 ## Run a container locally
