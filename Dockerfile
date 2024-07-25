@@ -103,6 +103,8 @@ RUN apt install -y imagemagick && \
 
 #RUN pecl install xdebug
 
+RUN apt upgrade
+
 RUN wget -P /etc/ssl/certs/ http://curl.haxx.se/ca/cacert.pem && \
     chmod 744 /etc/ssl/certs/cacert.pem
 #RUN pecl channel-update pecl.php.net
