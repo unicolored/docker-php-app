@@ -84,7 +84,7 @@ RUN apt update && apt install -y \
   php${PHP_VERSION}-amqp \
   php${PHP_VERSION}-mongodb \
   php${PHP_VERSION}-mysql \
-  php${PHP_VERSION}-sqlite \
+  php${PHP_VERSION}-pgsql \
   php${PHP_VERSION}-gd \
   php${PHP_VERSION}-intl \
   php${PHP_VERSION}-opcache \
