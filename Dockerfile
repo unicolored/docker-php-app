@@ -10,16 +10,16 @@ ARG TIMEZONE=Europe/Paris
 ###############
 # ENVIRONMENT #
 ###############
-ENV APP_ENV prod
-ENV PHP_VERSION 8.3
-ENV NODE_MAJOR 20
-ENV PROJECT_ROOT /var/www/html
-ENV SERVER_NAME localhost
-ENV SERVER_ADMIN admin@example.com
-ENV SERVER_DOCUMENT_ROOT ${PROJECT_ROOT}/public
-ENV PROJECT_VAR ${PROJECT_ROOT}/var
-ENV PROJECT_LOG ${PROJECT_VAR}/log
-ENV PROJECT_CACHE ${PROJECT_VAR}/cache
+ENV APP_ENV=prod
+ENV PHP_VERSION=8.3
+ENV NODE_MAJOR=20
+ENV PROJECT_ROOT=/var/www/html
+ENV SERVER_NAME=localhost
+ENV SERVER_ADMIN=admin@gilles.dev
+ENV SERVER_DOCUMENT_ROOT=${PROJECT_ROOT}/public
+ENV PROJECT_VAR=${PROJECT_ROOT}/var
+ENV PROJECT_LOG=${PROJECT_VAR}/log
+ENV PROJECT_CACHE=${PROJECT_VAR}/cache
 
 ARG BUILD_FILES=build_files
 ARG PROJECT_SRC=${BUILD_FILES}/public
@@ -31,7 +31,7 @@ RUN ln -sf /usr/share/zoneinfo/${TIMEZONE} /etc/localtime
 
 # dependencies required for running "phpize"
 # (see persistent deps below)
-ENV PHPIZE_DEPS \
+ARG PHPIZE_DEPS \
 		autoconf \
 		dpkg-dev \
 		file \
@@ -81,6 +81,7 @@ RUN apt update && apt install -y \
   php${PHP_VERSION}-common \
   php${PHP_VERSION}-curl \
   php${PHP_VERSION}-mbstring \
+  php${PHP_VERSION}-apcu \
   php${PHP_VERSION}-amqp \
   php${PHP_VERSION}-mongodb \
   php${PHP_VERSION}-mysql \
