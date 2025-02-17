@@ -30,7 +30,7 @@ The builds include:
 set -e
 
 REPOSITORY=php-app
-TAG=php83fpm-nginx-bookworm
+TAG=php74fpm-nginx-bookworm
 
 DOCKER_HOST=unicolored
 DOCKER_REPO="${DOCKER_HOST}/${REPOSITORY}:${TAG}"

@@ -1,4 +1,4 @@
-# PHP 8.3 FPM w/ Nginx
+# PHP 7.4 FPM w/ Nginx
 FROM debian:bookworm-slim
 
 #############
@@ -11,7 +11,7 @@ ARG TIMEZONE=Europe/Paris
 # ENVIRONMENT #
 ###############
 ENV APP_ENV=prod
-ENV PHP_VERSION=8.3
+ENV PHP_VERSION=7.4
 ENV NODE_MAJOR=20
 ENV PROJECT_ROOT=/var/www/html
 ENV SERVER_NAME=localhost
@@ -193,9 +193,9 @@ RUN yarn set version latest
 
 # CACHETOOL - to clear opcache
 # https://github.com/gordalina/cachetool
-RUN curl -sLO https://github.com/gordalina/cachetool/releases/latest/download/cachetool.phar && \
-    mv cachetool.phar /usr/local/bin/cachetool && \
-    chmod +x /usr/local/bin/cachetool
+# RUN curl -sLO https://github.com/gordalina/cachetool/releases/latest/download/cachetool.phar && \
+#     mv cachetool.phar /usr/local/bin/cachetool && \
+#     chmod +x /usr/local/bin/cachetool
 # -------------------------------------------------------------------------------------------------------------------- #
 
 RUN sudo update-alternatives --set php /usr/bin/php${PHP_VERSION}
@@ -233,10 +233,10 @@ COPY ${BUILD_FILES}/conf.d.extend.conf /etc/nginx/conf.d/extend.conf
 COPY ${BUILD_FILES}/public ${PROJECT_ROOT}/public
 COPY ${BUILD_FILES}/fpm/website_pool.conf /etc/php/${PHP_VERSION}/fpm/pool.d
 # Will create the sock, so supervisor can start the program php-fpm
-RUN /etc/init.d/php${PHP_VERSION}-fpm start && \
-    cachetool opcache:reset && \
-    cachetool opcache:status && \
-    /etc/init.d/php${PHP_VERSION}-fpm stop
+RUN /etc/init.d/php${PHP_VERSION}-fpm start
+# RUN cachetool opcache:reset && \
+#     cachetool opcache:status
+RUN /etc/init.d/php${PHP_VERSION}-fpm stop
 
 ############################
 # SUPERVISOR CONFIGURATION #
