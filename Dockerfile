@@ -1,4 +1,4 @@
-# PHP 8.3 FPM w/ Nginx
+# PHP 8.4 FPM w/ Nginx
 FROM debian:bookworm-slim
 
 #############
@@ -11,8 +11,8 @@ ARG TIMEZONE=Europe/Paris
 # ENVIRONMENT #
 ###############
 ENV APP_ENV=prod
-ENV PHP_VERSION=8.3
-ENV NODE_MAJOR=20
+ENV PHP_VERSION=8.4
+ENV NODE_MAJOR=22
 ENV PROJECT_ROOT=/var/www/html
 ENV SERVER_NAME=localhost
 ENV SERVER_ADMIN=admin@gilles.dev
@@ -97,6 +97,7 @@ RUN apt update && apt install -y \
   php-excimer
 
 RUN apt purge php8.2\* -y
+RUN apt purge php8.3\* -y
 
 RUN apt install -y imagemagick && \
     apt clean && \

@@ -57,7 +57,7 @@ set -e
 
 CONTAINER_NAME=MyContainer
 REPOSITORY=php-app
-TAG=php82fpm-nginx-bookworm
+TAG=php84fpm-nginx-bookworm
 AWS_HOST=951583383645.dkr.ecr.eu-west-1.amazonaws.com/ci
 DOCKER_HOST=unicolored
 DOCKER_REPO="${DOCKER_HOST}/${REPOSITORY}:${TAG}"
