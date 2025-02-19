@@ -11,3 +11,4 @@ DOCKER_REPO="${DOCKER_HOST}/${REPOSITORY}:${TAG}"
 DOCKER_REPO_LATEST="${DOCKER_HOST}/${REPOSITORY}:latest"
 
 docker buildx build --builder cloud-unicolored-my-cloud-builder --push -t "${DOCKER_REPO}" -t "${DOCKER_REPO_LATEST}" .
+#docker buildx build -t "${DOCKER_REPO}" -t "${DOCKER_REPO_LATEST}" .
