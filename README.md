@@ -55,17 +55,20 @@ docker buildx build --builder cloud-unicolored-my-cloud-builder --push -t "${DOC
 
 set -e
 
-CONTAINER_NAME=MyContainer
 REPOSITORY=php-app
-TAG=php82fpm-nginx-bookworm
-AWS_HOST=951583383645.dkr.ecr.eu-west-1.amazonaws.com/ci
+TAG=php83fpm-nginx-bookworm
 DOCKER_HOST=unicolored
 DOCKER_REPO="${DOCKER_HOST}/${REPOSITORY}:${TAG}"
 DOCKER_REPO_LATEST="${DOCKER_HOST}/${REPOSITORY}:latest"
 
-docker stop $CONTAINER_NAME || true
-docker rm $CONTAINER_NAME || true
-docker build -t "${DOCKER_REPO}" -t "${DOCKER_REPO_LATEST}" .
-docker run -d --name $CONTAINER_NAME -p 1337:80 "${DOCKER_REPO}"
-docker exec -it $CONTAINER_NAME /bin/bash
+docker buildx build --builder cloud-unicolored-my-cloud-builder --push -t "${DOCKER_REPO}" -t "${DOCKER_REPO_LATEST}" .
+
+#CONTAINER_NAME=MyContainer
+#docker stop $CONTAINER_NAME || true
+#docker rm $CONTAINER_NAME || true
+
+#docker build -t "${DOCKER_REPO}" -t "${DOCKER_REPO_LATEST}" .
+
+#docker run -d --name $CONTAINER_NAME -p 1337:80 "${DOCKER_REPO}"
+#docker exec -it $CONTAINER_NAME /bin/bash
 ```
