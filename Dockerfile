@@ -12,7 +12,7 @@ ARG TIMEZONE=Europe/Paris
 ###############
 ENV APP_ENV=prod
 ENV PHP_VERSION=8.3
-ENV NODE_MAJOR=20
+ENV NODE_MAJOR=22
 ENV PROJECT_ROOT=/var/www/html
 ENV SERVER_NAME=localhost
 ENV SERVER_ADMIN=admin@gilles.dev
