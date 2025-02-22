@@ -110,7 +110,7 @@ RUN wget -P /etc/ssl/certs/ http://curl.haxx.se/ca/cacert.pem && \
     chmod 744 /etc/ssl/certs/cacert.pem
 #RUN pecl channel-update pecl.php.net
 #RUN pecl install mongodb-1.15.0
-#RUN pecl install redis
+RUN printf "\n" | pecl install redis
 #RUN pecl upgrade
 
 #COPY ${BUILD_FILES}/php.ini /etc/php/${PHP_VERSION}/cli/php.ini
