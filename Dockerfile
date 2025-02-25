@@ -237,7 +237,7 @@ RUN /etc/init.d/php${PHP_VERSION}-fpm start && \
     cachetool opcache:status && \
     /etc/init.d/php${PHP_VERSION}-fpm stop
 
-RUN printf "\n" | pecl install redis
+#RUN printf "\n" | pecl install redis
 
 ############################
 # SUPERVISOR CONFIGURATION #
