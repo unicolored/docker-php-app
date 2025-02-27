@@ -4,12 +4,13 @@ FROM debian:bookworm-slim
 #############
 # VARIABLES #
 #############
-ARG MACHINE_USER=devops
 ARG TIMEZONE=Europe/Paris
 
 ###############
 # ENVIRONMENT #
 ###############
+ENV MACHINE_USER=devops
+ENV NGINX_PHP_GROUP=www-data
 ENV APP_ENV=prod
 ENV PHP_VERSION=8.3
 ENV NODE_MAJOR=22
@@ -47,6 +48,7 @@ RUN apt update && apt install -y \
     ca-certificates \
     curl \
     gnupg \
+    less \
     wget \
     xz-utils \
     sudo \
