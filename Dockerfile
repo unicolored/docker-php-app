@@ -233,7 +233,7 @@ COPY ${BUILD_FILES}/sites-available-default.conf /etc/nginx/sites-available/defa
 COPY ${BUILD_FILES}/conf.d.extend.conf /etc/nginx/conf.d/extend.conf
 COPY ${BUILD_FILES}/public ${PROJECT_ROOT}/public
 COPY ${BUILD_FILES}/fpm/website_pool.conf /etc/php/${PHP_VERSION}/fpm/pool.d
-RUN mkdir /etc/nginx/custom
+RUN mkdir -p /etc/nginx/custom
 # Will create the sock, so supervisor can start the program php-fpm
 RUN /etc/init.d/php${PHP_VERSION}-fpm start && \
     cachetool opcache:reset && \
