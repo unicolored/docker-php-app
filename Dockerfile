@@ -75,6 +75,7 @@ RUN wget -O- https://packages.sury.org/php/apt.gpg | apt-key add - && \
 RUN apt update && apt install -y \
   nginx \
   redis \
+  acl \
   #blackfire \
   openssl \
   php${PHP_VERSION}-fpm \
