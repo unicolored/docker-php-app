@@ -44,6 +44,14 @@ fi
 
 if [ "$run_test" = true ]; then
     echo "Running test container..."
+
+    # Check if php-test container exists (running or stopped) and remove it if so
+    if [ "$(docker ps -aq -f name=php-test)" ]; then
+        echo "Stopping and removing existing php-test container..."
+        docker stop php-test || true  # Ignore if already stopped
+        docker rm php-test || true    # Ignore if already removed
+    fi
+
     docker pull "${DOCKER_REPO}"  # Ensure latest is local (harmless if built locally)
     docker run -d -p 8080:80 --name php-test "${DOCKER_REPO}"
     echo "Test container started! Access at http://localhost:8080"
