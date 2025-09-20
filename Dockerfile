@@ -187,6 +187,9 @@ COPY --from=builder /usr/local/lib/php/extensions /usr/local/lib/php/extensions/
 COPY ${BUILD_FILES}/sites-available-default.conf /etc/nginx/http.d/default.conf
 COPY ${BUILD_FILES}/http.d.extend.conf /etc/nginx/http.d/extend.conf
 
+# Override default nginx.conf to resolve duplicates
+COPY ${BUILD_FILES}/nginx.conf /etc/nginx/nginx.conf
+
 # PHP-FPM pool
 COPY ${BUILD_FILES}/fpm/website_pool.conf /usr/local/etc/php-fpm.d/website_pool.conf
 
