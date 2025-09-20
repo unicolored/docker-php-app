@@ -174,7 +174,7 @@ COPY --from=builder /usr/bin/composer /usr/bin/composer
 COPY --from=builder /usr/local/bin/wp /usr/local/bin/wp
 COPY --from=builder /usr/local/bin/cachetool /usr/local/bin/cachetool
 COPY --from=builder /usr/local/bin/aws /usr/local/bin/aws
-COPY --from=builder /usr/local/lib/aws /usr/local/lib/aws
+COPY --from=builder /usr/local/aws-cli /usr/local/aws-cli
 
 # Copy app and configs from builder
 COPY --from=builder /app /var/www/html
@@ -185,12 +185,17 @@ COPY --from=builder /usr/local/lib/php/extensions /usr/local/lib/php/extensions/
 
 # Nginx config (HTTP only for prod)
 COPY ${BUILD_FILES}/sites-available-default.conf /etc/nginx/http.d/default.conf
-COPY ${BUILD_FILES}/conf.d.extend.conf /etc/nginx/conf.d/extend.conf
+COPY ${BUILD_FILES}/http.d.extend.conf /etc/nginx/http.d/extend.conf
 
 # PHP-FPM pool
 COPY ${BUILD_FILES}/fpm/website_pool.conf /usr/local/etc/php-fpm.d/website_pool.conf
 
-# Supervisor setup: Ensure run dirs for socket/PID
+# Create non-root user (MOVED UP: Must happen before chown in Supervisor setup)
+RUN addgroup -g 1337 ${MACHINE_USER} \
+    && adduser -u 1337 -G ${MACHINE_USER} -s /bin/sh -D ${MACHINE_USER} \
+    && addgroup ${MACHINE_USER} www-data
+
+# Supervisor setup: Ensure run dirs for socket/PID (NOW AFTER USER CREATION)
 RUN mkdir -p /var/run /etc/supervisor/conf.d \
     && chown -R ${MACHINE_USER}:www-data /var/run /etc/supervisor
 
@@ -202,11 +207,6 @@ COPY ${BUILD_FILES}/supervisord.conf /etc/supervisord.conf
 COPY ${BUILD_FILES}/mdcron /etc/cron.d/mdcron
 RUN chmod 0644 /etc/cron.d/mdcron \
     && crontab /etc/cron.d/mdcron
-
-# Create non-root user
-RUN addgroup -g 1337 ${MACHINE_USER} \
-    && adduser -u 1337 -G ${MACHINE_USER} -s /bin/sh -D ${MACHINE_USER} \
-    && addgroup ${MACHINE_USER} www-data
 
 # NEW: Set up Neovim config dir (empty, for COPY)
 RUN mkdir -p /home/${MACHINE_USER}/.config/nvim \
