@@ -1,3 +1,3 @@
 #! /bin/bash
 
-trivy image php83fpm-nginx-alpine:8.3
+trivy image unicolored/php-app:php83fpm-nginx-alpine
