@@ -48,4 +48,5 @@ if [ "$run_test" = true ]; then
     docker run -d -p 8080:80 --name php-test "${DOCKER_REPO}"
     echo "Test container started! Access at http://localhost:8080"
     echo "To stop and remove: docker stop php-test && docker rm php-test"
+    open http://localhost:8080
 fi
