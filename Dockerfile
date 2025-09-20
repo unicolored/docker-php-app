@@ -1,14 +1,8 @@
-# PHP 8.3 FPM w/ Nginx
-FROM debian:bookworm-slim
+# Stage 1: Build stage for dependencies (e.g., Composer, Node/Yarn installs)
+FROM php:8.3-fpm-alpine AS builder
 
-#############
-# VARIABLES #
-#############
 ARG TIMEZONE=Europe/Paris
-
-###############
-# ENVIRONMENT #
-###############
+ENV TIMEZONE=${TIMEZONE}
 ENV MACHINE_USER=devops
 ENV NGINX_PHP_GROUP=www-data
 ENV APP_ENV=prod
@@ -24,252 +18,227 @@ ENV PROJECT_CACHE=${PROJECT_VAR}/cache
 
 ARG BUILD_FILES=build_files
 ARG PROJECT_SRC=${BUILD_FILES}/public
-# -------------------------------------------------------------------------------------------------------------------- #
 
-USER root
-RUN echo "${TIMEZONE}" > /etc/timezone
-RUN ln -sf /usr/share/zoneinfo/${TIMEZONE} /etc/localtime
-
-# dependencies required for running "phpize"
-# (see persistent deps below)
-ARG PHPIZE_DEPS \
-		autoconf \
-		dpkg-dev \
-		file \
-		g++ \
-		gcc \
-		libc-dev \
-		make \
-		pkg-config \
-		re2c
-
-RUN apt update && apt install -y \
-    $PHPIZE_DEPS \
+# Install build dependencies and PHP extensions
+RUN apk add --no-cache --virtual .build-deps \
+    autoconf \
+    dpkg-dev \
+    file \
+    g++ \
+    gcc \
+    libc-dev \
+    make \
+    pkgconf \
+    re2c \
+    && apk add --no-cache \
     ca-certificates \
     curl \
     gnupg \
-    less \
     wget \
-    xz-utils \
+    xz \
     sudo \
     unzip \
-    apt-transport-https \
     lsb-release \
-    cron \
-    multitail \
-    nano \
-    supervisor \
-    mariadb-server \
+    busybox-extras \
     mariadb-client \
-    php-dev \
-    php-pear \
-    htop \
-    rename
+    php83-pear \
+    findutils \
+    git \
+    libzip-dev \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    libwebp-dev \
+    icu-dev \
+    oniguruma-dev \
+    rabbitmq-c-dev \
+    libxml2-dev \
+    postgresql-dev \
+    imagemagick \
+    imagemagick-dev \
+    linux-headers \
+    tzdata \
+    zip \
+    python3 \
+    py3-pip \
+    nodejs=~${NODE_MAJOR} \
+    npm \
+    yarn \
+    && cp /usr/share/zoneinfo/${TIMEZONE} /etc/localtime \
+    && echo "${TIMEZONE}" > /etc/timezone \
+    && docker-php-ext-configure gd --with-jpeg --with-webp \
+    && docker-php-ext-install \
+    pdo_mysql \
+    pdo_pgsql \
+    zip \
+    gd \
+    intl \
+    mbstring \
+    exif \
+    pcntl \
+    opcache \
+    soap \
+    xml \
+    && pecl install apcu amqp mongodb redis \
+    && docker-php-ext-enable apcu amqp mongodb redis opcache \
+    && apk del .build-deps
 
-RUN wget -O- https://packages.sury.org/php/apt.gpg | apt-key add - && \
-    echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list
-
-#RUN wget -q -O - https://packages.blackfire.io/gpg.key | sudo dd of=/usr/share/keyrings/blackfire-archive-keyring.asc && \
-#    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/blackfire-archive-keyring.asc] http://packages.blackfire.io/debian any main" | sudo tee /etc/apt/sources.list.d/blackfire.list
-
-RUN apt update && apt install -y \
-  nginx \
-  redis \
-  acl \
-  #blackfire \
-  openssl \
-  php${PHP_VERSION}-fpm \
-  php-fpm \
-  php${PHP_VERSION}-cli \
-  php${PHP_VERSION}-common \
-  php${PHP_VERSION}-curl \
-  php${PHP_VERSION}-mbstring \
-  php${PHP_VERSION}-apcu \
-  php${PHP_VERSION}-amqp \
-  php${PHP_VERSION}-mongodb \
-  php${PHP_VERSION}-mysql \
-  php${PHP_VERSION}-pgsql \
-  php${PHP_VERSION}-gd \
-  php${PHP_VERSION}-intl \
-  php${PHP_VERSION}-opcache \
-  php${PHP_VERSION}-zip \
-  php${PHP_VERSION}-redis \
-  php${PHP_VERSION}-soap \
-  php${PHP_VERSION}-xml \
-  php${PHP_VERSION}-xdebug \
-  php-excimer
-
-RUN apt purge php8.2\* -y
-
-RUN apt install -y imagemagick && \
-    apt clean && \
-    rm -rf /tmp/* /var/tmp/*
-
-#RUN pecl install xdebug
-
-RUN apt upgrade -y
-
-RUN wget -P /etc/ssl/certs/ http://curl.haxx.se/ca/cacert.pem && \
-    chmod 744 /etc/ssl/certs/cacert.pem
-#RUN pecl channel-update pecl.php.net
-#RUN pecl install mongodb-1.15.0
-#RUN pecl upgrade
-
-#COPY ${BUILD_FILES}/php.ini /etc/php/${PHP_VERSION}/cli/php.ini
-#COPY ${BUILD_FILES}/php.ini /etc/php/${PHP_VERSION}/fpm/php.ini
-COPY ${BUILD_FILES}/conf.d /etc/php/${PHP_VERSION}/cli/conf.d
-COPY ${BUILD_FILES}/conf.d /etc/php/${PHP_VERSION}/fpm/conf.d
-
-#RUN mkdir -p /usr/local/etc/openssl@1.1
-#COPY ${BUILD_FILES}/cert.pem /usr/local/etc/openssl@1.1/cert.pem
-
-# ADD SELF SIGNED CERTS FOR LOCALHOST HTTPS
-# ssl_certificate /etc/ssl/certs/server.cert;
-COPY ${BUILD_FILES}/certs/server.cert /etc/ssl/certs/server.cert
-# ssl_certificate_key /etc/ssl/private/server.key;
-COPY ${BUILD_FILES}/certs/server.key /etc/ssl/private/server.key
-
-
-#####################
-# CUSTOM USER SETUP #
-#####################
-# Creating the user and group
-#RUN groupadd ${MACHINE_USER}
-RUN addgroup --gid 1337 ${MACHINE_USER}
-RUN useradd -g ${MACHINE_USER} -m -d /home/${MACHINE_USER} ${MACHINE_USER} -s /bin/bash
-#RUN adduser --disabled-password --gecos "" --force-badname --ingroup ${MACHINE_USER} ${MACHINE_USER}
-RUN usermod -aG www-data ${MACHINE_USER}
-
-#########################
-# AWS CLI Install & Setup #
-#########################
-RUN cd && \
-    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
-    unzip awscliv2.zip && \
-    ./aws/install
-
-# Install CloudWatch Agent
-#COPY ${BUILD_FILES}/amazon-cloudwatch-agent.deb /root/amazon-cloudwatch-agent.deb
-#RUN dpkg -i -E /root/amazon-cloudwatch-agent.deb
-
-
-#RUN mkdir -p /var/run/blackfire
-#RUN blackfire php:install && \
-#    blackfire agent:config \
-#    --server-id=<server_id> \
-#    --server-token=<server_token> \
-#    --socket=tcp://127.0.0.1:8307 \
-#    --log-file=/var/log/blackfire-agent.log
-
-RUN rm -r /var/lib/apt/lists/*
-
-# COMPOSER INSTALLATION
-RUN curl -sS https://getcomposer.org/installer | php && \
-    mv composer.phar /usr/local/bin/composer && \
-    chmod +x /usr/local/bin/composer
-
-RUN composer -V
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 RUN composer self-update
 
-# WP-CLI INSTALLATION
-USER root
-RUN cd /home/${MACHINE_USER} && \
-    curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
-    php wp-cli.phar --info && \
-    chmod +x wp-cli.phar && \
-    mv /home/${MACHINE_USER}/wp-cli.phar /usr/local/bin/wp
-RUN wp cli update
+# Install WP-CLI (for WordPress if needed)
+RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
+    && chmod +x wp-cli.phar \
+    && mv wp-cli.phar /usr/local/bin/wp \
+    && wp cli update
 
-# YARN
-RUN mkdir -p /etc/apt/keyrings && \
-    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+# Install Yarn
+RUN corepack enable && yarn set version stable
 
-RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
+# Install Cachetool
+RUN curl -sLO https://github.com/gordalina/cachetool/releases/latest/download/cachetool.phar \
+    && mv cachetool.phar /usr/local/bin/cachetool \
+    && chmod +x /usr/local/bin/cachetool
 
-RUN apt update && apt install -y \
-  nodejs
-RUN npm install --global yarn
-RUN corepack enable
-RUN yarn set version stable
-RUN yarn set version latest
+# Install AWS CLI
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
+    && unzip awscliv2.zip \
+    && ./aws/install \
+    && rm -rf awscliv2.zip aws
 
-# CACHETOOL - to clear opcache
-# https://github.com/gordalina/cachetool
-RUN curl -sLO https://github.com/gordalina/cachetool/releases/latest/download/cachetool.phar && \
-    mv cachetool.phar /usr/local/bin/cachetool && \
-    chmod +x /usr/local/bin/cachetool
-# -------------------------------------------------------------------------------------------------------------------- #
+# Set working directory
+WORKDIR /app
 
-RUN sudo update-alternatives --set php /usr/bin/php${PHP_VERSION}
-RUN sudo update-alternatives --set phar /usr/bin/phar${PHP_VERSION}
-RUN sudo update-alternatives --set phar.phar /usr/bin/phar.phar${PHP_VERSION}
+# Copy composer files for caching
+COPY composer.json composer.lock* /app/
 
-######################
-# DEFAULT LOGS FILES #
-######################
-USER root
-RUN mkdir ${PROJECT_VAR} -p
-RUN mkdir ${PROJECT_ROOT}/public -p
-RUN mkdir ${PROJECT_LOG}/nginx -p
-# -------------------------------------------------------------------------------------------------------------------- #
+# Install app dependencies
+RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interaction
 
-#####################################
-# PROJECT ROOT DIRECTORY OWNSERSHIP #
-#####################################
-USER root
-RUN chown ${MACHINE_USER}:www-data ${PROJECT_ROOT} -R
-
-# PROJECT DIRECTORIES PERMISSIONS
-USER root
-RUN chmod 775 ${PROJECT_ROOT} -R && \
-    chmod 2775 ${PROJECT_VAR} -R && \
-    chmod 2777 ${PROJECT_LOG} -R
-# -------------------------------------------------------------------------------------------------------------------- #
-
-############################
-# NGINX CONFIGURATION #
-############################
-# The file in sites-available has a symlink "default" in sites-enabled
-COPY ${BUILD_FILES}/sites-available-default.conf /etc/nginx/sites-available/default
-COPY ${BUILD_FILES}/conf.d.extend.conf /etc/nginx/conf.d/extend.conf
+# Copy app code and build files
+COPY . /app
+COPY ${BUILD_FILES}/conf.d /usr/local/etc/php/conf.d/
 COPY ${BUILD_FILES}/public ${PROJECT_ROOT}/public
-COPY ${BUILD_FILES}/fpm/website_pool.conf /etc/php/${PHP_VERSION}/fpm/pool.d
-RUN mkdir -p /etc/nginx/custom
-# Will create the sock, so supervisor can start the program php-fpm
-RUN /etc/init.d/php${PHP_VERSION}-fpm start && \
-    cachetool opcache:reset && \
-    cachetool opcache:status && \
-    /etc/init.d/php${PHP_VERSION}-fpm stop
 
-#RUN printf "\n" | pecl install redis
+# For Symfony: Run build if needed
+# RUN php bin/console asset:install --no-debug
 
-############################
-# SUPERVISOR CONFIGURATION #
-############################
-USER root
+# Stage 2: Runtime stage with Nginx
+FROM php:8.3-fpm-alpine
+
+# Re-declare ENVs
+ARG TIMEZONE=Europe/Paris
+ENV TIMEZONE=${TIMEZONE}
+ENV MACHINE_USER=devops
+ENV NGINX_PHP_GROUP=www-data
+# ... (repeat other ENVs as needed)
+
+# Install runtime deps (minimal for prod)
+RUN apk add --no-cache \
+    nginx \
+    redis \
+    acl \
+    openssl \
+    supervisor \
+    mariadb-client \
+    curl \
+    neovim \
+    wget \
+    unzip \
+    busybox-extras \
+    sudo \
+    findutils \
+    tzdata \
+    libzip \
+    libpng \
+    libjpeg-turbo \
+    libwebp \
+    icu \
+    oniguruma \
+    libxml2 \
+    postgresql-libs \
+    rabbitmq-c \
+    imagemagick \
+    nodejs=~${NODE_MAJOR} \
+    npm \
+    yarn \
+    python3 \
+    py3-pip \
+    && cp /usr/share/zoneinfo/${TIMEZONE} /etc/localtime \
+    && echo "${TIMEZONE}" > /etc/timezone \
+    && docker-php-ext-install \
+    pdo_mysql \
+    pdo_pgsql \
+    zip \
+    gd \
+    intl \
+    mbstring \
+    exif \
+    pcntl \
+    opcache \
+    soap \
+    xml \
+    && pecl install apcu amqp mongodb redis \
+    && docker-php-ext-enable apcu amqp mongodb redis opcache
+
+# Copy tools from builder (prod-relevant only)
+COPY --from=builder /usr/bin/composer /usr/bin/composer
+COPY --from=builder /usr/local/bin/wp /usr/local/bin/wp
+COPY --from=builder /usr/local/bin/cachetool /usr/local/bin/cachetool
+COPY --from=builder /usr/local/bin/aws /usr/local/bin/aws
+COPY --from=builder /usr/local/lib/aws /usr/local/lib/aws
+
+# Copy app and configs from builder
+COPY --from=builder /app /var/www/html
+COPY --from=builder /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d/
+
+# Nginx config (HTTP only for prod)
+COPY ${BUILD_FILES}/sites-available-default.conf /etc/nginx/http.d/default.conf
+COPY ${BUILD_FILES}/conf.d.extend.conf /etc/nginx/conf.d/extend.conf
+
+# PHP-FPM pool
+COPY ${BUILD_FILES}/fpm/website_pool.conf /usr/local/etc/php-fpm.d/website_pool.conf
+
+# Supervisor setup: Ensure run dirs for socket/PID
+RUN mkdir -p /var/run /etc/supervisor/conf.d \
+    && chown -R ${MACHINE_USER}:www-data /var/run /etc/supervisor
+
+# Supervisor config
 COPY ${BUILD_FILES}/supermd.conf /etc/supervisor/conf.d/supermd.conf
-COPY ${BUILD_FILES}/supervisord.conf /etc/supervisor/supervisord.conf
-# -------------------------------------------------------------------------------------------------------------------- #
+COPY ${BUILD_FILES}/supervisord.conf /etc/supervisord.conf
 
-#######################
-# CRON CONFIGURATION #
-#######################
-USER root
-# Add crontab file in the cron directory
+# Cron setup
 COPY ${BUILD_FILES}/mdcron /etc/cron.d/mdcron
-# Give execution rights on the cron job
-# Apply cron job
-RUN chmod 0644 /etc/cron.d/mdcron && \
-    crontab /etc/cron.d/mdcron
-# -------------------------------------------------------------------------------------------------------------------- #
+RUN chmod 0644 /etc/cron.d/mdcron \
+    && crontab /etc/cron.d/mdcron
 
-RUN php -m
-RUN php -v
+# Create non-root user
+RUN addgroup -g 1337 ${MACHINE_USER} \
+    && adduser -u 1337 -G ${MACHINE_USER} -s /bin/sh -D ${MACHINE_USER} \
+    && addgroup ${MACHINE_USER} www-data
 
-#########################
-# RUN SUPERVISOR DAEMON #
-#########################
-USER root
-CMD ["/usr/bin/supervisord"]
+# NEW: Set up Neovim config dir (empty, for COPY)
+RUN mkdir -p /home/${MACHINE_USER}/.config/nvim \
+    && chown -R ${MACHINE_USER}:${MACHINE_USER} /home/${MACHINE_USER}/.config
 
-WORKDIR ${PROJECT_ROOT}
+# COPY your init.vim from project (assume in build_files/)
+COPY --chown=${MACHINE_USER}:${MACHINE_USER} ${BUILD_FILES}/init.vim /home/${MACHINE_USER}/.config/nvim/init.vim
+
+# Directories, ownership, permissions
+RUN mkdir -p ${PROJECT_VAR} ${PROJECT_LOG}/nginx ${PROJECT_CACHE} \
+    && chown -R ${MACHINE_USER}:www-data ${PROJECT_ROOT} \
+    && chmod -R 775 ${PROJECT_ROOT} \
+    && chmod -R 2775 ${PROJECT_VAR} \
+    && chmod -R 2777 ${PROJECT_LOG}
+
+# Health check for Kubernetes readiness/liveness probes
+HEALTHCHECK --interval=30s --timeout=3s CMD curl -f http://localhost/ || exit 1
+
+# Verify PHP
+RUN php -m && php -v
+
+# Expose HTTP only
+EXPOSE 80
+
+# Run Supervisor
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
