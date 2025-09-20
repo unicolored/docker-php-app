@@ -62,12 +62,12 @@ RUN apk add --no-cache --virtual .build-deps \
     py3-pip \
     nodejs=~${NODE_MAJOR} \
     npm \
-    yarn \
     && cp /usr/share/zoneinfo/${TIMEZONE} /etc/localtime \
     && echo "${TIMEZONE}" > /etc/timezone \
     && docker-php-ext-configure gd --with-jpeg --with-webp \
     && docker-php-ext-install \
     pdo_mysql \
+    zip \
     gd \
     intl \
     mbstring \
@@ -90,7 +90,10 @@ RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli
     && mv wp-cli.phar /usr/local/bin/wp \
     && wp cli update
 
-# Install Yarn
+# Install corepack via npm (workaround for Alpine's nodejs LTS not including it)
+RUN npm install -g corepack@latest
+
+# Enable corepack and set Yarn to stable (modern version)
 RUN corepack enable && yarn set version stable
 
 # Install Cachetool
@@ -163,9 +166,6 @@ RUN apk add --no-cache \
     imagemagick \
     nodejs=~${NODE_MAJOR} \
     npm \
-    yarn \
-    python3 \
-    py3-pip \
     && cp /usr/share/zoneinfo/${TIMEZONE} /etc/localtime \
     && echo "${TIMEZONE}" > /etc/timezone
 
