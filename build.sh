@@ -26,8 +26,11 @@ done
 GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 REPOSITORY=php-app
 TAG=$GIT_BRANCH
-DOCKER_REPO="${DOCKER_HOST}/${REPOSITORY}:${TAG}"
-DOCKER_REPO_LATEST="${DOCKER_HOST}/${REPOSITORY}:latest"
+DOCKER_REPO="${MY_DOCKER_NAMESPACE}/${REPOSITORY}:${TAG}"
+DOCKER_REPO_LATEST="${MY_DOCKER_NAMESPACE}/${REPOSITORY}:latest"
+
+echo $DOCKER_REPO
+echo $MY_DOCKER_CLOUD_BUILDER
 
 if [ "$local_build" = true ]; then
     echo "Building locally..."
@@ -36,7 +39,7 @@ if [ "$local_build" = true ]; then
     docker push "${DOCKER_REPO_LATEST}"
 else
     echo "Building in cloud..."
-    docker buildx build --builder "${DOCKER_CLOUD_BUILDER}" --push -t "${DOCKER_REPO}" -t "${DOCKER_REPO_LATEST}" .
+    docker buildx build --builder "${MY_DOCKER_CLOUD_BUILDER}" --push -t "${DOCKER_REPO}" -t "${DOCKER_REPO_LATEST}" .
 fi
 
 if [ "$run_test" = true ]; then
