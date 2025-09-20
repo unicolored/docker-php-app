@@ -1,5 +1,12 @@
+ARG BUILD_FILES=build_files
+ARG PROJECT_SRC=${BUILD_FILES}/public
+ARG NODE_MAJOR=22  # Global ARG for Node.js major version
+
 # Stage 1: Build stage for dependencies (e.g., Composer, Node/Yarn installs)
 FROM php:8.3-fpm-alpine AS builder
+
+ARG BUILD_FILES  # Import global ARG for use in this stage
+ARG NODE_MAJOR   # Import global ARG for use in this stage
 
 ARG TIMEZONE=Europe/Paris
 ENV TIMEZONE=${TIMEZONE}
@@ -7,7 +14,6 @@ ENV MACHINE_USER=devops
 ENV NGINX_PHP_GROUP=www-data
 ENV APP_ENV=prod
 ENV PHP_VERSION=8.3
-ENV NODE_MAJOR=22
 ENV PROJECT_ROOT=/var/www/html
 ENV SERVER_NAME=localhost
 ENV SERVER_ADMIN=admin@gilles.dev
@@ -15,9 +21,6 @@ ENV SERVER_DOCUMENT_ROOT=${PROJECT_ROOT}/public
 ENV PROJECT_VAR=${PROJECT_ROOT}/var
 ENV PROJECT_LOG=${PROJECT_VAR}/log
 ENV PROJECT_CACHE=${PROJECT_VAR}/cache
-
-ARG BUILD_FILES=build_files
-ARG PROJECT_SRC=${BUILD_FILES}/public
 
 # Install build dependencies and PHP extensions
 RUN apk add --no-cache --virtual .build-deps \
@@ -38,10 +41,8 @@ RUN apk add --no-cache --virtual .build-deps \
     xz \
     sudo \
     unzip \
-    lsb-release \
     busybox-extras \
     mariadb-client \
-    php83-pear \
     findutils \
     git \
     libzip-dev \
@@ -52,7 +53,6 @@ RUN apk add --no-cache --virtual .build-deps \
     oniguruma-dev \
     rabbitmq-c-dev \
     libxml2-dev \
-    postgresql-dev \
     imagemagick \
     imagemagick-dev \
     linux-headers \
@@ -68,8 +68,6 @@ RUN apk add --no-cache --virtual .build-deps \
     && docker-php-ext-configure gd --with-jpeg --with-webp \
     && docker-php-ext-install \
     pdo_mysql \
-    pdo_pgsql \
-    zip \
     gd \
     intl \
     mbstring \
@@ -109,12 +107,6 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
 # Set working directory
 WORKDIR /app
 
-# Copy composer files for caching
-COPY composer.json composer.lock* /app/
-
-# Install app dependencies
-RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interaction
-
 # Copy app code and build files
 COPY . /app
 COPY ${BUILD_FILES}/conf.d /usr/local/etc/php/conf.d/
@@ -126,12 +118,23 @@ COPY ${BUILD_FILES}/public ${PROJECT_ROOT}/public
 # Stage 2: Runtime stage with Nginx
 FROM php:8.3-fpm-alpine
 
-# Re-declare ENVs
+ARG BUILD_FILES  # Import global ARG for use in this stage
+ARG NODE_MAJOR   # Import global ARG for use in this stage
+
+# Re-declare ARGs/ENVs as needed
 ARG TIMEZONE=Europe/Paris
 ENV TIMEZONE=${TIMEZONE}
 ENV MACHINE_USER=devops
 ENV NGINX_PHP_GROUP=www-data
-# ... (repeat other ENVs as needed)
+ENV APP_ENV=prod
+ENV PHP_VERSION=8.3
+ENV PROJECT_ROOT=/var/www/html
+ENV SERVER_NAME=localhost
+ENV SERVER_ADMIN=admin@gilles.dev
+ENV SERVER_DOCUMENT_ROOT=${PROJECT_ROOT}/public
+ENV PROJECT_VAR=${PROJECT_ROOT}/var
+ENV PROJECT_LOG=${PROJECT_VAR}/log
+ENV PROJECT_CACHE=${PROJECT_VAR}/cache
 
 # Install runtime deps (minimal for prod)
 RUN apk add --no-cache \
@@ -156,7 +159,6 @@ RUN apk add --no-cache \
     icu \
     oniguruma \
     libxml2 \
-    postgresql-libs \
     rabbitmq-c \
     imagemagick \
     nodejs=~${NODE_MAJOR} \
@@ -165,21 +167,7 @@ RUN apk add --no-cache \
     python3 \
     py3-pip \
     && cp /usr/share/zoneinfo/${TIMEZONE} /etc/localtime \
-    && echo "${TIMEZONE}" > /etc/timezone \
-    && docker-php-ext-install \
-    pdo_mysql \
-    pdo_pgsql \
-    zip \
-    gd \
-    intl \
-    mbstring \
-    exif \
-    pcntl \
-    opcache \
-    soap \
-    xml \
-    && pecl install apcu amqp mongodb redis \
-    && docker-php-ext-enable apcu amqp mongodb redis opcache
+    && echo "${TIMEZONE}" > /etc/timezone
 
 # Copy tools from builder (prod-relevant only)
 COPY --from=builder /usr/bin/composer /usr/bin/composer
@@ -191,6 +179,9 @@ COPY --from=builder /usr/local/lib/aws /usr/local/lib/aws
 # Copy app and configs from builder
 COPY --from=builder /app /var/www/html
 COPY --from=builder /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d/
+
+# Copy compiled PHP extensions from builder (avoids recompiling in runtime)
+COPY --from=builder /usr/local/lib/php/extensions /usr/local/lib/php/extensions/
 
 # Nginx config (HTTP only for prod)
 COPY ${BUILD_FILES}/sites-available-default.conf /etc/nginx/http.d/default.conf
