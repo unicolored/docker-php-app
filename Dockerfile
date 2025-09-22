@@ -113,7 +113,7 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
 WORKDIR /app
 
 # Copy app code and build files
-RUN mv ${PHP_INI_DIR}php.ini-production ${PHP_INI_DIR}php.ini
+RUN mv ${PHP_INI_DIR}/php.ini-production ${PHP_INI_DIR}/php.ini
 COPY ${BUILD_FILES}/php/conf.d.90-extend-php.ini ${PHP_INI_DIR}/conf.d/
 
 # Stage 2: Runtime stage with Nginx
@@ -180,7 +180,7 @@ COPY --from=builder /usr/local/aws-cli /usr/local/aws-cli
 # Copy app and configs from builder
 # COPY --from=builder /app /var/www/html
 COPY ${BUILD_FILES}/public ${PROJECT_ROOT}/public
-COPY --from=builder ${PHP_INI_DIR}conf.d ${PHP_INI_DIR}conf.d/
+COPY --from=builder ${PHP_INI_DIR}/conf.d ${PHP_INI_DIR}/conf.d/
 
 # Copy compiled PHP extensions from builder (avoids recompiling in runtime)
 COPY --from=builder /usr/local/lib/php/extensions /usr/local/lib/php/extensions/
