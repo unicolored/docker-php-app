@@ -35,6 +35,7 @@ RUN apk add --no-cache --virtual .build-deps \
     make \
     pkgconf \
     re2c \
+    sqlite-dev \
     && apk add --no-cache \
     ca-certificates \
     curl \
@@ -64,13 +65,12 @@ RUN apk add --no-cache --virtual .build-deps \
     py3-pip \
     nodejs=~${NODE_MAJOR} \
     npm \
-    sqlite sqlite-dev \
     && cp /usr/share/zoneinfo/${TIMEZONE} /etc/localtime \
     && echo "${TIMEZONE}" > /etc/timezone \
     && docker-php-ext-configure gd --with-jpeg --with-webp \
     && docker-php-ext-install \
     pdo_mysql \
-    pdo_sqlite sqlite3 \
+    pdo_sqlite \
     zip \
     gd \
     intl \
@@ -142,7 +142,7 @@ ENV PROJECT_CACHE=${PROJECT_VAR}/cache
 ENV PHP_SESSION_SAVE_HANDLER=files
 ENV PHP_SESSION_SAVE_PATH=/tmp
 
-# Install runtime deps (minimal for prod)
+# Install runtime deps (minimal for prod;)
 RUN apk add --no-cache \
     nginx \
     redis \
@@ -169,6 +169,7 @@ RUN apk add --no-cache \
     imagemagick \
     nodejs=~${NODE_MAJOR} \
     npm \
+    sqlite-libs \
     && cp /usr/share/zoneinfo/${TIMEZONE} /etc/localtime \
     && echo "${TIMEZONE}" > /etc/timezone
 
