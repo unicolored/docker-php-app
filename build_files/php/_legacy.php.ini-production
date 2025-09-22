@@ -1,5 +1,5 @@
 [PHP]
-# FROM unicolored/php-app
+
 ;;;;;;;;;;;;;;;;;;;
 ; About php.ini   ;
 ;;;;;;;;;;;;;;;;;;;
@@ -358,13 +358,13 @@ disable_classes =
 ; the file operations performed.
 ; Note: if open_basedir is set, the cache is disabled
 ; https://php.net/realpath-cache-size
-realpath_cache_size = 4096k
+;realpath_cache_size = 4096k
 
 ; Duration of time, in seconds for which to cache realpath information for a given
 ; file or directory. For systems with rarely changing files, consider increasing this
 ; value.
 ; https://php.net/realpath-cache-ttl
-realpath_cache_ttl = 600
+;realpath_cache_ttl = 120
 
 ; Enables or disables the circular reference collector.
 ; https://php.net/zend.enable-gc
@@ -442,7 +442,7 @@ max_input_time = 60
 
 ; Maximum amount of memory a script may consume
 ; https://php.net/memory-limit
-memory_limit = 2048M
+memory_limit = 128M
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Error handling and logging ;
@@ -605,7 +605,6 @@ report_memleaks = On
 ;error_log = php_errors.log
 ; Log errors to syslog (Event Log on Windows).
 ;error_log = syslog
-error_log=/proc/self/fd/2
 
 ; The syslog ident is a string which is prepended to every message logged
 ; to syslog. Only used when error_log is set to syslog.
@@ -753,7 +752,7 @@ default_charset = "UTF-8"
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; UNIX: "/path1:/path2"
-;include_path = ".:/usr/share/php"
+;include_path = ".:/php/includes"
 ;
 ; Windows: "\path1;\path2"
 ;include_path = ".;c:\php\includes"
@@ -863,7 +862,7 @@ file_uploads = On
 
 ; Maximum allowed size for uploaded files.
 ; https://php.net/upload-max-filesize
-upload_max_filesize = 5M
+upload_max_filesize = 2M
 
 ; Maximum number of files that can be uploaded via a single request
 max_file_uploads = 20
@@ -987,7 +986,7 @@ cli_server.color = On
 [Date]
 ; Defines the default timezone used by the date functions
 ; https://php.net/date.timezone
-date.timezone = "Europe/Paris"
+;date.timezone =
 
 ; https://php.net/date.default-latitude
 ;date.default_latitude = 31.7667
@@ -1382,7 +1381,7 @@ session.save_handler = files
 ; where MODE is the octal representation of the mode. Note that this
 ; does not overwrite the process's umask.
 ; https://php.net/session.save-path
-;session.save_path = "/var/lib/php/sessions"
+;session.save_path = "/tmp"
 
 ; Whether to use strict session mode.
 ; Strict session mode does not accept an uninitialized session ID, and
@@ -1449,12 +1448,7 @@ session.serialize_handler = php
 ; Development Value: 1
 ; Production Value: 1
 ; https://php.net/session.gc-probability
-; Debian Default Value: 0
-; This is disabled in the Debian packages due to the strict permissions
-; on /var/lib/php. Instead, GC is performed through /etc/cron.d/php,
-; which uses the session.gc_maxlifetime setting. Please, check
-; /usr/share/doc/php8.2-common/README.Debian.gz for further reference.
-session.gc_probability = 0
+session.gc_probability = 1
 
 ; Defines the probability that the 'garbage collection' process is started on every
 ; session initialization. The probability is calculated by using gc_probability/gc_divisor,
@@ -1780,20 +1774,20 @@ ldap.max_links = -1
 
 [opcache]
 ; Determines if Zend OPCache is enabled
-opcache.enable=1
+;opcache.enable=1
 
 ; Determines if Zend OPCache is enabled for the CLI version of PHP
-opcache.enable_cli=0
+;opcache.enable_cli=0
 
 ; The OPcache shared memory storage size.
-opcache.memory_consumption=256
+;opcache.memory_consumption=128
 
 ; The amount of memory for interned strings in Mbytes.
 ;opcache.interned_strings_buffer=8
 
 ; The maximum number of keys (scripts) in the OPcache hash table.
 ; Only numbers between 200 and 1000000 are allowed.
-opcache.max_accelerated_files=20000
+;opcache.max_accelerated_files=10000
 
 ; The maximum percentage of "wasted" memory until a restart is scheduled.
 ;opcache.max_wasted_percentage=5
@@ -1806,7 +1800,7 @@ opcache.max_accelerated_files=20000
 
 ; When disabled, you must reset the OPcache manually or restart the
 ; webserver for changes to the filesystem to take effect.
-opcache.validate_timestamps=0
+;opcache.validate_timestamps=1
 
 ; How often (in seconds) to check file timestamps for changes to the shared
 ; memory storage allocation. ("1" means validate once per second, but only

@@ -21,6 +21,8 @@ ENV SERVER_DOCUMENT_ROOT=${PROJECT_ROOT}/public
 ENV PROJECT_VAR=${PROJECT_ROOT}/var
 ENV PROJECT_LOG=${PROJECT_VAR}/log
 ENV PROJECT_CACHE=${PROJECT_VAR}/cache
+ENV PHP_SESSION_SAVE_HANDLER=files
+ENV PHP_SESSION_SAVE_PATH=/tmp
 
 # Install build dependencies and PHP extensions
 RUN apk add --no-cache --virtual .build-deps \
@@ -111,18 +113,15 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
 WORKDIR /app
 
 # Copy app code and build files
-COPY . /app
-COPY ${BUILD_FILES}/conf.d /usr/local/etc/php/conf.d/
-COPY ${BUILD_FILES}/public ${PROJECT_ROOT}/public
-
-# For Symfony: Run build if needed
-# RUN php bin/console asset:install --no-debug
+RUN mv /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
+COPY ${BUILD_FILES}/php/conf.d.90-extend-php.ini /usr/local/etc/php/conf.d/
 
 # Stage 2: Runtime stage with Nginx
 FROM php:8.3-fpm-alpine
 
-ARG BUILD_FILES  # Import global ARG for use in this stage
-ARG NODE_MAJOR   # Import global ARG for use in this stage
+# Import global ARG for use in this stage
+ARG BUILD_FILES
+ARG NODE_MAJOR
 
 # Re-declare ARGs/ENVs as needed
 ARG TIMEZONE=Europe/Paris
@@ -138,6 +137,8 @@ ENV SERVER_DOCUMENT_ROOT=${PROJECT_ROOT}/public
 ENV PROJECT_VAR=${PROJECT_ROOT}/var
 ENV PROJECT_LOG=${PROJECT_VAR}/log
 ENV PROJECT_CACHE=${PROJECT_VAR}/cache
+ENV PHP_SESSION_SAVE_HANDLER=files
+ENV PHP_SESSION_SAVE_PATH=/tmp
 
 # Install runtime deps (minimal for prod)
 RUN apk add --no-cache \
@@ -177,21 +178,19 @@ COPY --from=builder /usr/local/bin/aws /usr/local/bin/aws
 COPY --from=builder /usr/local/aws-cli /usr/local/aws-cli
 
 # Copy app and configs from builder
-COPY --from=builder /app /var/www/html
+# COPY --from=builder /app /var/www/html
+COPY ${BUILD_FILES}/public ${PROJECT_ROOT}/public
 COPY --from=builder /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d/
 
 # Copy compiled PHP extensions from builder (avoids recompiling in runtime)
 COPY --from=builder /usr/local/lib/php/extensions /usr/local/lib/php/extensions/
 
 # Nginx config (HTTP only for prod)
-COPY ${BUILD_FILES}/sites-available-default.conf /etc/nginx/http.d/default.conf
-COPY ${BUILD_FILES}/http.d.extend.conf /etc/nginx/http.d/extend.conf
-
-# Override default nginx.conf to resolve duplicates
-COPY ${BUILD_FILES}/nginx.conf /etc/nginx/nginx.conf
+COPY ${BUILD_FILES}/nginx/http.d.default.conf /etc/nginx/http.d/default.conf
+COPY ${BUILD_FILES}/nginx/nginx.conf /etc/nginx/nginx.conf
 
 # PHP-FPM pool
-COPY ${BUILD_FILES}/fpm/website_pool.conf /usr/local/etc/php-fpm.d/website_pool.conf
+COPY ${BUILD_FILES}/php/fpm.website_pool.conf /usr/local/etc/php-fpm.d/website_pool.conf
 
 # Create non-root user (MOVED UP: Must happen before chown in Supervisor setup)
 RUN addgroup -g 1337 ${MACHINE_USER} \
