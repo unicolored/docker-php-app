@@ -1,3 +1,4 @@
+# IMAGE REPO: unicolored/php-app:php83fpm-nginx-alpine
 ARG BUILD_FILES=build_files
 ARG PROJECT_SRC=${BUILD_FILES}/public
 ARG NODE_MAJOR=22  # Global ARG for Node.js major version
@@ -214,11 +215,10 @@ RUN mkdir -p /home/${MACHINE_USER}/.config/nvim \
 COPY --chown=${MACHINE_USER}:${MACHINE_USER} ${BUILD_FILES}/init.vim /home/${MACHINE_USER}/.config/nvim/init.vim
 
 # Directories, ownership, permissions
-RUN mkdir -p ${PROJECT_VAR} ${PROJECT_LOG}/nginx ${PROJECT_CACHE} \
+RUN mkdir -p ${PROJECT_VAR} ${PROJECT_CACHE} \
     && chown -R ${MACHINE_USER}:www-data ${PROJECT_ROOT} \
     && chmod -R 775 ${PROJECT_ROOT} \
-    && chmod -R 2775 ${PROJECT_VAR} \
-    && chmod -R 2777 ${PROJECT_LOG}
+    && chmod -R 2775 ${PROJECT_VAR}
 
 # Health check for Kubernetes readiness/liveness probes
 HEALTHCHECK --interval=30s --timeout=3s CMD curl -f http://localhost/ || exit 1
