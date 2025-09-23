@@ -39,7 +39,7 @@ if [ "$local_build" = true ]; then
     docker push "${DOCKER_REPO_LATEST}"
 else
     echo "Building in cloud..."
-    docker buildx build --builder "${MY_DOCKER_CLOUD_BUILDER}" --push -t "${DOCKER_REPO}" -t "${DOCKER_REPO_LATEST}" .
+    docker buildx build --builder "${MY_DOCKER_CLOUD_BUILDER}" --push --provenance=true --sbom=true -t "${DOCKER_REPO}" -t "${DOCKER_REPO_LATEST}" .
 fi
 
 if [ "$run_test" = true ]; then
