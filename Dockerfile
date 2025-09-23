@@ -4,6 +4,7 @@ ARG NODE_MAJOR=22  # Global ARG for Node.js major version
 
 # Stage 1: Build stage for dependencies (e.g., Composer, Node/Yarn installs)
 FROM php:8.3-fpm-alpine AS builder
+USER root
 
 ARG BUILD_FILES  # Import global ARG for use in this stage
 ARG NODE_MAJOR   # Import global ARG for use in this stage
@@ -14,9 +15,9 @@ ENV MACHINE_USER=devops
 ENV NGINX_PHP_GROUP=www-data
 ENV APP_ENV=prod
 ENV PHP_VERSION=8.3
-ENV PROJECT_ROOT=/var/www/html
-ENV SERVER_NAME=localhost
+ENV SERVER_NAME=_
 ENV SERVER_ADMIN=admin@gilles.dev
+ENV PROJECT_ROOT=/var/www/html
 ENV SERVER_DOCUMENT_ROOT=${PROJECT_ROOT}/public
 ENV PROJECT_VAR=${PROJECT_ROOT}/var
 ENV PROJECT_LOG=${PROJECT_VAR}/log
@@ -45,7 +46,6 @@ RUN apk add --no-cache --virtual .build-deps \
     sudo \
     unzip \
     busybox-extras \
-    mariadb-client \
     findutils \
     git \
     libzip-dev \
@@ -54,7 +54,6 @@ RUN apk add --no-cache --virtual .build-deps \
     libwebp-dev \
     icu-dev \
     oniguruma-dev \
-    rabbitmq-c-dev \
     libxml2-dev \
     imagemagick \
     imagemagick-dev \
@@ -80,8 +79,8 @@ RUN apk add --no-cache --virtual .build-deps \
     opcache \
     soap \
     xml \
-    && pecl install apcu amqp mongodb redis \
-    && docker-php-ext-enable apcu amqp mongodb redis opcache \
+    && pecl install apcu mongodb redis \
+    && docker-php-ext-enable apcu mongodb redis opcache \
     && apk del .build-deps
 
 # Install Composer
@@ -89,10 +88,10 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 RUN composer self-update
 
 # Install WP-CLI (for WordPress if needed)
-RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
-    && chmod +x wp-cli.phar \
-    && mv wp-cli.phar /usr/local/bin/wp \
-    && wp cli update
+# RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
+#     && chmod +x wp-cli.phar \
+#     && mv wp-cli.phar /usr/local/bin/wp \
+#     && wp cli update
 
 # Install corepack via npm (workaround for Alpine's nodejs LTS not including it)
 RUN npm install -g corepack@latest
@@ -106,13 +105,10 @@ RUN curl -sLO https://github.com/gordalina/cachetool/releases/latest/download/ca
     && chmod +x /usr/local/bin/cachetool
 
 # Install AWS CLI
-RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
-    && unzip awscliv2.zip \
-    && ./aws/install \
-    && rm -rf awscliv2.zip aws
-
-# Set working directory
-WORKDIR /app
+# RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
+#     && unzip awscliv2.zip \
+#     && ./aws/install \
+#     && rm -rf awscliv2.zip aws
 
 # Copy app code and build files
 RUN mv ${PHP_INI_DIR}/php.ini-production ${PHP_INI_DIR}/php.ini
@@ -120,6 +116,7 @@ COPY ${BUILD_FILES}/php/conf.d.90-extend-php.ini ${PHP_INI_DIR}/conf.d/
 
 # Stage 2: Runtime stage with Nginx
 FROM php:8.3-fpm-alpine
+USER root
 
 # Import global ARG for use in this stage
 ARG BUILD_FILES
@@ -149,7 +146,6 @@ RUN apk add --no-cache \
     acl \
     openssl \
     supervisor \
-    mariadb-client \
     curl \
     neovim \
     wget \
@@ -165,7 +161,6 @@ RUN apk add --no-cache \
     icu \
     oniguruma \
     libxml2 \
-    rabbitmq-c \
     imagemagick \
     nodejs=~${NODE_MAJOR} \
     npm \
@@ -175,13 +170,12 @@ RUN apk add --no-cache \
 
 # Copy tools from builder (prod-relevant only)
 COPY --from=builder /usr/bin/composer /usr/bin/composer
-COPY --from=builder /usr/local/bin/wp /usr/local/bin/wp
+# COPY --from=builder /usr/local/bin/wp /usr/local/bin/wp
 COPY --from=builder /usr/local/bin/cachetool /usr/local/bin/cachetool
-COPY --from=builder /usr/local/bin/aws /usr/local/bin/aws
-COPY --from=builder /usr/local/aws-cli /usr/local/aws-cli
+# COPY --from=builder /usr/local/bin/aws /usr/local/bin/aws
+# COPY --from=builder /usr/local/aws-cli /usr/local/aws-cli
 
 # Copy app and configs from builder
-# COPY --from=builder /app /var/www/html
 COPY ${BUILD_FILES}/public ${PROJECT_ROOT}/public
 COPY --from=builder ${PHP_INI_DIR}/conf.d ${PHP_INI_DIR}/conf.d/
 
@@ -235,6 +229,11 @@ RUN php -m && php -v
 
 # Expose HTTP only
 EXPOSE 80
+
+# Set working directory
+WORKDIR $PROJECT_ROOT
+
+USER $MACHINE_USER
 
 # Run Supervisor
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
