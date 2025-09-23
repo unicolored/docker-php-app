@@ -79,8 +79,8 @@ RUN apk add --no-cache --virtual .build-deps \
     opcache \
     soap \
     xml \
-    && pecl install apcu mongodb redis \
-    && docker-php-ext-enable apcu mongodb redis opcache \
+    && pecl install apcu mongodb \
+    && docker-php-ext-enable apcu mongodb opcache \
     && apk del .build-deps
 
 # Install Composer
@@ -142,7 +142,6 @@ ENV PHP_SESSION_SAVE_PATH=/tmp
 # Install runtime deps (minimal for prod;)
 RUN apk add --no-cache \
     nginx \
-    redis \
     acl \
     openssl \
     supervisor \
