@@ -232,7 +232,5 @@ EXPOSE 80
 # Set working directory
 WORKDIR $PROJECT_ROOT
 
-USER $MACHINE_USER
-
 # Run Supervisor
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
