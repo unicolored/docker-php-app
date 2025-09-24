@@ -23,8 +23,6 @@ ENV SERVER_DOCUMENT_ROOT=${PROJECT_ROOT}/public
 ENV PROJECT_VAR=${PROJECT_ROOT}/var
 ENV PROJECT_LOG=${PROJECT_VAR}/log
 ENV PROJECT_CACHE=${PROJECT_VAR}/cache
-ENV PHP_SESSION_SAVE_HANDLER=files
-ENV PHP_SESSION_SAVE_PATH=/tmp
 
 # Install build dependencies and PHP extensions
 RUN apk add --no-cache --virtual .build-deps \
