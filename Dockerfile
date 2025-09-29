@@ -200,9 +200,9 @@ RUN curl -sLO https://github.com/gordalina/cachetool/releases/latest/download/ca
     chmod +x /usr/local/bin/cachetool
 # -------------------------------------------------------------------------------------------------------------------- #
 
-RUN sudo update-alternatives --set php /usr/bin/php${PHP_VERSION}
-RUN sudo update-alternatives --set phar /usr/bin/phar${PHP_VERSION}
-RUN sudo update-alternatives --set phar.phar /usr/bin/phar.phar${PHP_VERSION}
+RUN update-alternatives --set php /usr/bin/php${PHP_VERSION}
+RUN update-alternatives --set phar /usr/bin/phar${PHP_VERSION}
+RUN update-alternatives --set phar.phar /usr/bin/phar.phar${PHP_VERSION}
 
 ######################
 # DEFAULT LOGS FILES #
@@ -248,7 +248,6 @@ RUN /etc/init.d/php${PHP_VERSION}-fpm start && \
 ############################
 USER root
 COPY ${BUILD_FILES}/supermd.conf /etc/supervisor/conf.d/supermd.conf
-COPY ${BUILD_FILES}/supervisord.conf /etc/supervisor/supervisord.conf
 # -------------------------------------------------------------------------------------------------------------------- #
 
 #######################
