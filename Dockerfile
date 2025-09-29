@@ -248,6 +248,7 @@ RUN /etc/init.d/php${PHP_VERSION}-fpm start && \
 ############################
 USER root
 COPY ${BUILD_FILES}/supermd.conf /etc/supervisor/conf.d/supermd.conf
+COPY ${BUILD_FILES}/supervisord.conf /etc/supervisor/supervisord.conf
 # -------------------------------------------------------------------------------------------------------------------- #
 
 #######################
