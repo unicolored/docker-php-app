@@ -1,0 +1,23 @@
+---
+services:
+  php:
+    image: phpcontainer
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    volumes:
+      - ./html:/var/www/html
+    ports:
+      - name: http
+        target: 80
+        published: ${HTTP_PORT:-80}
+        protocol: tcp
+    extra_hosts:
+      # Ensure that host.docker.internal is correctly defined on Linux
+      - host.docker.internal:host-gateway
+    tty: true
+
+networks:
+  default:
+    name: sandbox_network # Custom name to avoid conflicts with other projects
